@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  toolbox:
+    build: 
+       context: docker/.
+       dockerfile: Dockerfile
+       args:
+#          - PLATFORM_NAME=arm64
+#          - PLATFORM_NAME_ALTERNATE=aarch64
+          - PLATFORM_NAME=amd64
+          - PLATFORM_NAME_ALTERNATE=x86_64
+          - AWS_CLI_VER=2.11.12
+          - TERRAFORM_VER=1.4.5
+          - TERRAGRUNT_VER=0.45.2
+          - KUBECTL_VER=1.27.1
+          - HELM_VER=3.11.3
+          - K9S_VER=0.27.3
+          - NODE_VERSION=19.9.0
+          - SSH_KEY_NAME=id_ed25519
+    user: "${UID}:${GID}"
+    ports:
+      - "8082:8082"
+    command: sleep 36000
+    volumes:
+      - .:/terragrunt-aws
+      - ~/.aws:/root/.aws
+      - ~/.kube:/root/.kube
+      - ~/.ssh:/root/.ssh

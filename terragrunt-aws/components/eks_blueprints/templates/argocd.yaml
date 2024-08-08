@@ -1,0 +1,113 @@
+## Server
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    hostname: ${argo_hostname}
+    enabled: true
+    annotations:
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/group.name: ${alb_group_name}
+    labels: { }
+    ingressClassName: "alb"
+    hosts:
+      - ${argo_hostname}
+    paths:
+      - /
+    pathType: Prefix
+    extraPaths: [ ]
+
+  ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
+  # - path: /*
+  #   pathType: Prefix
+  #   backend:
+  #     service:
+  #       name: ssl-redirect
+  #       port:
+  #         name: use-annotation
+    tls: [ ]
+    # - secretName: argocd-tls-certificate
+  #   hosts:
+  #     - argocd.example.com
+
+  # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
+    https: true
+
+
+# dedicated ingress for gRPC as documented at
+# Ref: https://argoproj.github.io/argo-cd/operator-manual/ingress/
+  ingressGrpc:
+  # -- Enable an ingress resource for the Argo CD server for dedicated [gRPC-ingress]
+    enabled: false
+  # -- Setup up gRPC ingress to work with an AWS ALB
+    isAWSALB: true
+  # -- Additional ingress annotations for dedicated [gRPC-ingress]
+    annotations: { }
+  # -- Additional ingress labels for dedicated [gRPC-ingress]
+    labels: { }
+  # -- Defines which ingress controller will implement the resource [gRPC-ingress]
+    ingressClassName: ""
+
+    awsALB:
+    # -- Service type for the AWS ALB gRPC service
+    ## Service Type if isAWSALB is set to true
+    ## Can be of type NodePort or ClusterIP depending on which mode you are
+    ## are running. Instance mode needs type NodePort, IP mode needs type
+    ## ClusterIP
+    ## Ref: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/how-it-works/#ingress-traffic
+      serviceType: ClusterIP
+    # -- Backend protocol version for the AWS ALB gRPC service
+    ## This tells AWS to send traffic from the ALB using HTTP2. Can use gRPC as well if you want to leverage gRPC specific features
+      backendProtocolVersion: HTTP2
+
+  # -- List of ingress hosts for dedicated [gRPC-ingress]
+  ## Argo Ingress.
+  ## Hostnames must be provided if Ingress is enabled.
+  ## Secrets must be manually created in the namespace
+  ##
+    hosts:
+      - ${argo_hostname}
+    # - argocd.example.com
+
+  # -- List of ingress paths for dedicated [gRPC-ingress]
+    paths:
+     - /
+  # -- Ingress path type for dedicated [gRPC-ingress]. One of `Exact`, `Prefix` or `ImplementationSpecific`
+    pathType: Prefix
+  # -- Additional ingress paths for dedicated [gRPC-ingress]
+    extraPaths: [ ]
+    # - path: /*
+    #   backend:
+    #     serviceName: ssl-redirect
+    #     servicePort: use-annotation
+    ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
+    # - path: /*
+    #   pathType: Prefix
+    #   backend:
+    #     service:
+    #       name: ssl-redirect
+  #       port:
+  #         name: use-annotation
+
+  # -- Ingress TLS configuration for dedicated [gRPC-ingress]
+    tls: [ ]
+    # - secretName: argocd-tls-certificate
+  #   hosts:
+  #     - argocd.example.com
+
+  # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
+    https: true
+
+global:
+  tolerations:
+    - key: "layer"
+      operator: "Equal"
+      value: "base"
+      effect: "NoSchedule"

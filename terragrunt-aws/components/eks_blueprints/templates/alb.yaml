@@ -1,0 +1,9 @@
+spec:
+  source:
+    targetRevision: 1.6.0
+
+tolerations:
+  - key: "layer"
+    operator: "Equal"
+    value: "base"
+    effect: "NoSchedule"
