@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-spring-boot-api
+data:
+  config.json: |
+    {
+      "key": "value"
+    }
