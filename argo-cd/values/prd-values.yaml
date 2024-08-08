@@ -1,0 +1,4 @@
+# prd-values.yaml
+replicaCount: 5
+profile: prd
+host: prd.example.com

@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: spring-boot-api-appset
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: dev-global-cluster-0
+            valuesFile: dev-values.yaml
+          - cluster: prd-global-cluster-5
+            valuesFile: prd-values.yaml
+  template:
+    metadata:
+      name: '{{cluster}}-spring-boot-api'
+    spec:
+      project: argo-sample-spring-boot-api
+      source:
+        repoURL: 'https://github.com/eng-Zubr/argo-sample-spring-boot-api'
+        targetRevision: HEAD
+        path: 'helm/spring-boot-api'
+        helm:
+          valueFiles:
+            - 'argo-cd/values/{{valuesFile}}'
+      destination:
+        server: 'https://{{cluster}}'
+        namespace: '{{cluster}}-namespace'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

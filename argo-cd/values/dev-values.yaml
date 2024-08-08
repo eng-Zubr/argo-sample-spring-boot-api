@@ -1,0 +1,4 @@
+# dev-values.yaml
+replicaCount: 3
+profile: dev
+host: dev.example.com
